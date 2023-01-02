@@ -1,0 +1,92 @@
+﻿@model MovieFormViewModel
+
+@{
+    ViewData["Title"] = "Create Form";
+}
+
+<h2>@(Model.Id > 0 ? "Edit" : "Create") Movie</h2>
+
+<hr />
+
+@*asp-controller if not the same controller i send him from*@
+<section class="row">
+    <div class="col-md-4">
+        <form method="POST" asp-action=@(Model.Id > 0 ? "Edit" : "Create") enctype="multipart/form-data">
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <label class="text-muted" asp-for="Title"></label>
+                <input type="text" class="form-control" asp-for="Title" maxlength="250" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="text-muted" asp-for="GenreId"></label>
+                @*selectlist first: from where get data, second: The value attr, third: the value displayed to user*@
+                <select class="form-select" asp-for="GenreId" asp-items="@(new SelectList(Model.Genres,"Id","Name"))">
+                    <option></option>
+                </select>
+                <span asp-validation-for="GenreId" class="text-danger"></span>
+            </div>
+            <div class="form-group w-75">
+                <label class="text-muted" asp-for="Year"></label>
+                <input type="number" class="form-control" asp-for="Year" value="@(Model.Year > 0 ? Model.Year : String.Empty)"/>
+                <span asp-validation-for="Year" class="text-danger"></span>
+            </div>
+            <div class="form-group w-75">
+                <label class="text-muted" asp-for="Rate"></label>
+                <input type="number" class="form-control" asp-for="Rate" value="@(Model.Rate > 0 ? Model.Rate : String.Empty)" />
+                <span asp-validation-for="Rate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="text-muted" asp-for="Storyline"></label>
+                <textarea class="form-control" asp-for="Storyline" maxlength="2500" rows="3"></textarea>
+                <span asp-validation-for="Storyline" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3 mt-3">
+                <label asp-for="Poster" class="form-label text-muted">Poster</label>
+                <input class="form-control" type="file" asp-for="Poster" >
+                <span asp-validation-for="Poster" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check"></i>
+                Submit
+            </button>
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-x"></i>
+                Cancel
+            </a>
+        </form>
+    </div>
+    <div class="col-md-4">
+        <div id="poster-container" class="@(Model.Id > 0 ? String.Empty : "d-none")">
+            <img src="@(Model.Id > 0 ? $"data:image/*;base64,{Convert.ToBase64String(Model.Poster)}" : String.Empty)" alt="Poster" class="img-thumbnail" />
+        </div>
+    </div>
+</section>
+
+@section Scripts{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial"); 
+    }
+    <script>
+        $(document).ready(function(){
+            $("#Poster").on("change",function(){
+                var selectedFile = $(this).val().split("\\").pop(); //arr = ['C:', 'fakepath', 'Screenshot 2022-12-21 094250.png']. pop(): take last one
+
+                var posterContainer = $("#poster-container");
+                var image = window.URL.createObjectURL(this.files[0]); // select photo 
+
+                posterContainer.removeClass("d-none");
+                posterContainer.find("img").attr("src", image);
+            });
+
+            $("#Year").datepicker({
+                format:"yyyy",
+                viewMode:"years",
+                minViewMode:"years",
+                autoclose: true,
+                startDate:"1950",
+                endDate: new Date()
+            });
+        });
+    </script>
+}
